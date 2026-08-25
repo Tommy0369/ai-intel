@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.comic-shelf.ai-intel.mount</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__AI_INTEL_ROOT__/scripts/catchup.sh</string>
+    <string>mount</string>
+  </array>
+  <!-- 外付け320GB が現れた／中身が変わったとき -->
+  <key>WatchPaths</key>
+  <array>
+    <string>/Volumes/外付け320GB</string>
+    <string>/Volumes</string>
+  </array>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/tmp/ai-intel-mount.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/ai-intel-mount.err.log</string>
+  <key>WorkingDirectory</key>
+  <string>__AI_INTEL_ROOT__</string>
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin</string>
+  </dict>
+</dict>
+</plist>

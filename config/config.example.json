@@ -1,0 +1,11 @@
+{
+  "dataRoot": "/path/to/ai-intel-data",
+  "intervalMinutes": 30,
+  "minFreeGb": 5,
+  "dailyHour": 9,
+  "vetReviewHours": 24,
+  "dupWatchHours": 24,
+  "icloudBridgeRoot": "/path/to/intel-bridge",
+  "userAgent": "ai-intel/1.0 (+local collector; personal use)",
+  "googleDriveNotebookRoot": "/path/to/GoogleDrive/NotebookLM"
+}

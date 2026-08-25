@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.comic-shelf.ai-intel.catchup</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__AI_INTEL_ROOT__/scripts/catchup.sh</string>
+    <string>poll</string>
+  </array>
+  <!-- 起床後すぐ拾うため60秒間隔（未実施の日だけ実働） -->
+  <key>StartInterval</key>
+  <integer>60</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/tmp/ai-intel-catchup.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/ai-intel-catchup.err.log</string>
+  <key>WorkingDirectory</key>
+  <string>__AI_INTEL_ROOT__</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin</string>
+  </dict>
+</dict>
+</plist>

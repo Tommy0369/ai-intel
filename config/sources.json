@@ -1,0 +1,472 @@
+{
+  "arxiv": {
+    "enabled": true,
+    "categories": [
+      "cs.AI",
+      "cs.LG",
+      "cs.CL",
+      "cs.CV",
+      "cs.MA",
+      "q-bio.NC"
+    ],
+    "maxPerCategory": 40,
+    "keywordQueries": [
+      "ti:\"systematic review\"",
+      "ti:\"meta-analysis\"",
+      "ti:\"literature review\" AND (LLM OR \"large language\" OR agent OR RAG)"
+    ]
+  },
+  "europePmc": {
+    "enabled": true,
+    "maxPerQuery": 12,
+    "queries": [
+      {
+        "id": "sr-sleep",
+        "query": "(TITLE:\"systematic review\" OR PUB_TYPE:\"Systematic Review\") AND (sleep OR insomnia OR circadian) AND FIRST_PDATE:[2023-01-01 TO 3000-12-31]",
+        "categoryHint": "reviews",
+        "tags": ["genre:body", "topic:sleep"]
+      },
+      {
+        "id": "ma-exercise",
+        "query": "(TITLE:\"meta-analysis\" OR PUB_TYPE:\"Meta-Analysis\") AND (exercise OR \"resistance training\" OR hypertrophy OR \"physical activity\") AND FIRST_PDATE:[2023-01-01 TO 3000-12-31]",
+        "categoryHint": "reviews",
+        "tags": ["genre:body", "topic:exercise"]
+      },
+      {
+        "id": "sr-nutrition",
+        "query": "(TITLE:\"systematic review\" OR \"meta-analysis\") AND (nutrition OR protein OR diet OR fasting) AND FIRST_PDATE:[2023-01-01 TO 3000-12-31]",
+        "categoryHint": "reviews",
+        "tags": ["genre:body", "topic:nutrition"]
+      },
+      {
+        "id": "sr-psych",
+        "query": "(TITLE:\"systematic review\" OR \"meta-analysis\") AND (\"behavioral economics\" OR habit OR motivation OR \"cognitive bias\" OR mindfulness OR anxiety) AND FIRST_PDATE:[2023-01-01 TO 3000-12-31]",
+        "categoryHint": "reviews",
+        "tags": ["genre:mind"]
+      },
+      {
+        "id": "sr-ai",
+        "query": "(TITLE:\"systematic review\" OR \"meta-analysis\" OR \"scoping review\") AND (\"artificial intelligence\" OR \"machine learning\" OR \"large language model\" OR ChatGPT OR LLM) AND FIRST_PDATE:[2023-01-01 TO 3000-12-31]",
+        "categoryHint": "reviews",
+        "tags": ["genre:ai"]
+      },
+      {
+        "id": "sr-business",
+        "query": "(TITLE:\"systematic review\" OR \"meta-analysis\" OR \"scoping review\") AND (entrepreneurship OR \"small business\" OR marketing OR \"consumer behavior\" OR pricing) AND FIRST_PDATE:[2023-01-01 TO 3000-12-31]",
+        "categoryHint": "reviews",
+        "tags": ["genre:biz"]
+      },
+      {
+        "id": "sr-foodservice",
+        "query": "(TITLE:\"systematic review\" OR \"meta-analysis\" OR \"scoping review\") AND (restaurant OR \"food service\" OR \"foodservice\" OR hospitality OR \"ultra-processed\") AND FIRST_PDATE:[2023-01-01 TO 3000-12-31]",
+        "categoryHint": "reviews",
+        "tags": ["genre:dining"]
+      },
+      {
+        "id": "review-narrative",
+        "query": "(TITLE:\"narrative review\" OR TITLE:\"literature review\" OR TITLE:\"umbrella review\" OR PUB_TYPE:\"Review\") AND (sleep OR exercise OR habit OR \"artificial intelligence\" OR entrepreneurship) AND FIRST_PDATE:[2024-01-01 TO 3000-12-31]",
+        "categoryHint": "reviews",
+        "tags": ["genre:mixed", "kind:narrative"]
+      }
+    ]
+  },
+  "rss": {
+    "enabled": true,
+    "feeds": [
+      {
+        "id": "openai-blog",
+        "name": "OpenAI Blog",
+        "url": "https://openai.com/blog/rss.xml",
+        "categoryHint": "industry"
+      },
+      {
+        "id": "google-ai-blog",
+        "name": "Google AI Blog",
+        "url": "https://blog.google/technology/ai/rss/",
+        "categoryHint": "industry"
+      },
+      {
+        "id": "huggingface-blog",
+        "name": "Hugging Face Blog",
+        "url": "https://huggingface.co/blog/feed.xml",
+        "categoryHint": "opensource"
+      },
+      {
+        "id": "simonwillison",
+        "name": "Simon Willison",
+        "url": "https://simonwillison.net/atom/everything/",
+        "categoryHint": "tools"
+      },
+      {
+        "id": "marktechpost",
+        "name": "MarkTechPost",
+        "url": "https://www.marktechpost.com/feed/",
+        "categoryHint": "industry"
+      },
+      {
+        "id": "hn-ai",
+        "name": "Hacker News AI",
+        "url": "https://hnrss.org/newest?q=AI+OR+LLM+OR+GPT+OR+Claude&count=30",
+        "categoryHint": "industry"
+      },
+      {
+        "id": "google-news-anthropic",
+        "name": "Google News Anthropic",
+        "url": "https://news.google.com/rss/search?q=Anthropic+AI&hl=en-US&gl=US&ceid=US:en",
+        "categoryHint": "industry"
+      },
+      {
+        "id": "techcrunch",
+        "name": "TechCrunch",
+        "url": "https://techcrunch.com/feed/",
+        "categoryHint": "trends"
+      },
+      {
+        "id": "theverge",
+        "name": "The Verge",
+        "url": "https://www.theverge.com/rss/index.xml",
+        "categoryHint": "trends"
+      },
+      {
+        "id": "hn-launches",
+        "name": "Hacker News Show HN",
+        "url": "https://hnrss.org/show?count=30",
+        "categoryHint": "trends"
+      },
+      {
+        "id": "google-news-wearables",
+        "name": "Google News Wearables AI Health",
+        "url": "https://news.google.com/rss/search?q=wearable+OR+fitness+tracker+OR+%22health+AI%22+OR+%22sleep+tech%22&hl=en-US&gl=US&ceid=US:en",
+        "categoryHint": "trends"
+      },
+      {
+        "id": "behavioral-scientist",
+        "name": "Behavioral Scientist",
+        "url": "https://behavioralscientist.org/feed/",
+        "categoryHint": "mind"
+      },
+      {
+        "id": "bps-digest",
+        "name": "BPS Research Digest",
+        "url": "https://digest.bps.org.uk/feed/",
+        "categoryHint": "mind"
+      },
+      {
+        "id": "psypost",
+        "name": "PsyPost",
+        "url": "https://www.psypost.org/feed/",
+        "categoryHint": "mind"
+      },
+      {
+        "id": "sciencedaily-mind",
+        "name": "ScienceDaily Mind & Brain",
+        "url": "https://www.sciencedaily.com/rss/mind_brain.xml",
+        "categoryHint": "mind"
+      },
+      {
+        "id": "nudge-blog",
+        "name": "Nudge Blog (Thaler/Sunstein related)",
+        "url": "https://www.nudges.org/feed/",
+        "categoryHint": "mind"
+      },
+      {
+        "id": "strongerbyscience",
+        "name": "Stronger by Science",
+        "url": "https://www.strongerbyscience.com/feed/",
+        "categoryHint": "body"
+      },
+      {
+        "id": "sciencedaily-fitness",
+        "name": "ScienceDaily Fitness",
+        "url": "https://www.sciencedaily.com/rss/health_medicine/fitness.xml",
+        "categoryHint": "body"
+      },
+      {
+        "id": "sciencedaily-sleep",
+        "name": "ScienceDaily Sleep",
+        "url": "https://www.sciencedaily.com/rss/health_medicine/sleep_disorder_research.xml",
+        "categoryHint": "body"
+      },
+      {
+        "id": "examine-blog",
+        "name": "Examine.com Blog",
+        "url": "https://examine.com/feed/",
+        "categoryHint": "body"
+      },
+      {
+        "id": "google-news-sleep-training",
+        "name": "Google News Sleep Training Nutrition",
+        "url": "https://news.google.com/rss/search?q=sleep+OR+strength+training+OR+hypertrophy+OR+nutrition+science&hl=en-US&gl=US&ceid=US:en",
+        "categoryHint": "body"
+      },
+      {
+        "id": "nrn",
+        "name": "Nation's Restaurant News",
+        "url": "https://www.nrn.com/rss.xml",
+        "categoryHint": "dining"
+      },
+      {
+        "id": "restaurant-dive",
+        "name": "Restaurant Dive",
+        "url": "https://www.restaurantdive.com/feeds/news",
+        "categoryHint": "dining"
+      },
+      {
+        "id": "modern-restaurant",
+        "name": "Modern Restaurant Management",
+        "url": "https://modernrestaurantmanagement.com/feed/",
+        "categoryHint": "dining"
+      },
+      {
+        "id": "google-news-dining-en",
+        "name": "Google News Restaurant Business",
+        "url": "https://news.google.com/rss/search?q=restaurant+business+OR+%22ghost+kitchen%22+OR+foodservice+OR+QSR&hl=en-US&gl=US&ceid=US:en",
+        "categoryHint": "dining"
+      },
+      {
+        "id": "google-news-dining-ja",
+        "name": "Google News 飲食店経営",
+        "url": "https://news.google.com/rss/search?q=%E9%A3%B2%E9%A3%9F%E5%BA%97+%E7%B5%8C%E5%96%B6+OR+%E5%A4%96%E9%A3%9F+%E3%83%88%E3%83%AC%E3%83%B3%E3%83%89+OR+%E3%82%B4%E3%83%BC%E3%82%B9%E3%83%88%E3%82%AD%E3%83%83%E3%83%81%E3%83%B3&hl=ja&gl=JP&ceid=JP:ja",
+        "categoryHint": "dining"
+      },
+      {
+        "id": "fsrmagazine",
+        "name": "Foodservice Equipment Reports / related",
+        "url": "https://www.fsrmagazine.com/feed/",
+        "categoryHint": "dining"
+      },
+      {
+        "id": "hbr",
+        "name": "Harvard Business Review",
+        "url": "https://feeds.feedburner.com/harvardbusiness",
+        "categoryHint": "biz"
+      },
+      {
+        "id": "entrepreneur",
+        "name": "Entrepreneur",
+        "url": "https://www.entrepreneur.com/latest.rss",
+        "categoryHint": "biz"
+      },
+      {
+        "id": "hubspot-marketing",
+        "name": "HubSpot Marketing Blog",
+        "url": "https://blog.hubspot.com/marketing/rss.xml",
+        "categoryHint": "biz"
+      },
+      {
+        "id": "yc-blog",
+        "name": "Y Combinator Blog",
+        "url": "https://www.ycombinator.com/blog/rss/",
+        "categoryHint": "biz"
+      },
+      {
+        "id": "stratechery",
+        "name": "Stratechery",
+        "url": "https://stratechery.com/feed/",
+        "categoryHint": "biz"
+      },
+      {
+        "id": "google-news-biz-en",
+        "name": "Google News Small Business Marketing",
+        "url": "https://news.google.com/rss/search?q=%22small+business%22+OR+marketing+OR+%22customer+acquisition%22+OR+solopreneur+OR+%22content+marketing%22&hl=en-US&gl=US&ceid=US:en",
+        "categoryHint": "biz"
+      },
+      {
+        "id": "google-news-biz-ja",
+        "name": "Google News 起業・マーケ・個人事業",
+        "url": "https://news.google.com/rss/search?q=%E8%B5%B7%E6%A5%AD+OR+%E3%83%9E%E3%83%BC%E3%82%B1%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0+OR+%E5%80%8B%E4%BA%BA%E4%BA%8B%E6%A5%AD+OR+%E9%9B%86%E5%AE%A2+OR+%E5%89%AF%E6%A5%AD&hl=ja&gl=JP&ceid=JP:ja",
+        "categoryHint": "biz"
+      }
+    ]
+  },
+  "github": {
+    "enabled": true,
+    "queries": [
+      "topic:llm stars:>50 pushed:>2025-01-01",
+      "topic:ai-agents stars:>20 pushed:>2025-01-01",
+      "topic:rag stars:>30 pushed:>2025-01-01",
+      "topic:langchain stars:>50 pushed:>2025-01-01",
+      "topic:llamaindex stars:>50 pushed:>2025-01-01",
+      "topic:quantified-self stars:>10 pushed:>2024-01-01",
+      "habit tracker AI stars:>10 pushed:>2024-01-01"
+    ],
+    "maxPerQuery": 20
+  },
+  "youtube": {
+    "enabled": true,
+    "channels": [
+      {
+        "id": "UCbfYPyITQ-7l4upoX8nvctg",
+        "name": "Two Minute Papers"
+      },
+      {
+        "id": "UCXZCJLdBC09xxGZ6gcdrc6A",
+        "name": "OpenAI"
+      },
+      {
+        "id": "UCP7jMXSY2xbc3KCAE0MHQ-A",
+        "name": "Google DeepMind"
+      },
+      {
+        "id": "UCZHmQk67mSJgfCCTn7xBfew",
+        "name": "Yannic Kilcher"
+      },
+      {
+        "id": "UCFKvygsBXaIgfLWQ3m3Rlmw",
+        "name": "AI Explained"
+      },
+      {
+        "id": "UCK8sQmJBp8GCxrOtXWBpyEA",
+        "name": "Google Cloud Tech"
+      },
+      {
+        "id": "UC3RSjLMg2S8uWLmmI0i39bw",
+        "name": "Andrew Huberman"
+      }
+    ],
+    "searchFeeds": [
+      {
+        "id": "yt-search-behavioral",
+        "query": "behavioral economics OR cognitive bias explained",
+        "categoryHint": "mind"
+      },
+      {
+        "id": "yt-search-strength",
+        "query": "evidence based strength training",
+        "categoryHint": "body"
+      },
+      {
+        "id": "yt-search-sleep",
+        "query": "sleep science protocol",
+        "categoryHint": "body"
+      },
+      {
+        "id": "yt-search-future-gadgets",
+        "query": "future gadgets wearable health AI",
+        "categoryHint": "trends"
+      },
+      {
+        "id": "yt-search-restaurant",
+        "query": "restaurant business tips OR ghost kitchen OR menu engineering",
+        "categoryHint": "dining"
+      },
+      {
+        "id": "yt-search-dining-ja",
+        "query": "飲食店 経営 ノウハウ",
+        "categoryHint": "dining"
+      },
+      {
+        "id": "yt-search-marketing",
+        "query": "content marketing OR customer acquisition OR sales funnel",
+        "categoryHint": "biz"
+      },
+      {
+        "id": "yt-search-biz-ja",
+        "query": "個人事業 集客 OR 起業 マーケティング",
+        "categoryHint": "biz"
+      }
+    ],
+    "maxPerFeed": 15
+  },
+  "reddit": {
+    "enabled": true,
+    "subreddits": [
+      "MachineLearning",
+      "LocalLLaMA",
+      "singularity",
+      "ArtificialIntelligence",
+      "LangChain",
+      "psychology",
+      "BehavioralEconomics",
+      "neuroscience",
+      "sleep",
+      "Fitness",
+      "bodyweightfitness",
+      "nutrition",
+      "Futurology",
+      "gadgets",
+      "restaurantowners",
+      "restaurateur",
+      "KitchenConfidential",
+      "smallbusiness",
+      "Entrepreneur",
+      "marketing",
+      "startups",
+      "SideProject"
+    ],
+    "maxPerSub": 20
+  },
+  "docs": {
+    "enabled": true,
+    "feeds": [
+      {
+        "id": "langchain-blog",
+        "name": "LangChain Blog",
+        "url": "https://www.langchain.com/blog/rss.xml",
+        "categoryHint": "agents"
+      },
+      {
+        "id": "vercel-ai",
+        "name": "Vercel Blog",
+        "url": "https://vercel.com/atom",
+        "categoryHint": "tools"
+      },
+      {
+        "id": "pytorch-blog",
+        "name": "PyTorch Blog",
+        "url": "https://pytorch.org/blog/feed/",
+        "categoryHint": "opensource"
+      }
+    ]
+  },
+  "x": {
+    "enabled": true,
+    "nitterInstances": [
+      "https://nitter.net",
+      "https://nitter.privacydev.net"
+    ],
+    "accounts": [
+      {
+        "handle": "OpenAI",
+        "categoryHint": "industry"
+      },
+      {
+        "handle": "AnthropicAI",
+        "categoryHint": "industry"
+      },
+      {
+        "handle": "GoogleDeepMind",
+        "categoryHint": "research"
+      },
+      {
+        "handle": "karpathy",
+        "categoryHint": "llms"
+      },
+      {
+        "handle": "sama",
+        "categoryHint": "industry"
+      },
+      {
+        "handle": "hubermanlab",
+        "categoryHint": "body"
+      },
+      {
+        "handle": "RichardThaler",
+        "categoryHint": "mind"
+      },
+      {
+        "handle": "producthunt",
+        "categoryHint": "trends"
+      },
+      {
+        "handle": "GuyKawasaki",
+        "categoryHint": "biz"
+      },
+      {
+        "handle": "dharmesh",
+        "categoryHint": "biz"
+      }
+    ],
+    "maxPerAccount": 15
+  }
+}
