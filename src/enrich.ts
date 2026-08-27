@@ -12,7 +12,14 @@ import {
   selectUniqueMembers,
   type CanonicalMember,
 } from "./enrich-canonicalize.js";
-import type { AppConfig, CatalogEntry, SourceKind } from "./types.js";
+import type { AppConfig, CatalogEntry, FetchStatus, SourceKind } from "./types.js";
+import { patchCatalogEntries } from "./catalog-patch.js";
+import {
+  hostnameOf,
+  mapFetchStatusFromEnrich,
+} from "./canonical/catalog-fields.js";
+import { recordSourceAttempt } from "./source-health/source-health-store.js";
+import { normalizeUrl } from "./dedup.js";
 
 export type EnrichStatus = "ok" | "failed" | "partial" | "skipped";
 export type EnrichKind = "article" | "transcript" | "none";
@@ -24,6 +31,11 @@ export interface EnrichRecord {
   status: EnrichStatus;
   kind: EnrichKind;
   finalUrl?: string;
+  discoveryUrl?: string;
+  canonicalUrl?: string;
+  canonicalDomain?: string;
+  contentHash?: string;
+  httpStatus?: number;
   title?: string;
   text: string;
   chars: number;
@@ -172,16 +184,25 @@ export async function enrichOne(
       source: entry.source,
       status: tr.ok ? "ok" : "failed",
       kind: "transcript",
+      discoveryUrl: entry.discovery_url || entry.url,
+      canonicalUrl: entry.url,
+      canonicalDomain: hostnameOf(entry.url),
       title: entry.title_ja || entry.title,
       text: tr.text,
       chars: tr.chars,
       lang: tr.lang,
       error: tr.error,
-      strategy: "youtube",
+      strategy: "youtube-transcript",
       aliasIds: opts?.aliasIds,
       enrichedAt: nowIso(),
     };
+    if (tr.ok && tr.text) {
+      const { contentHashSha256 } = await import("./canonical/content-hash.js");
+      record.contentHash = contentHashSha256(tr.text);
+    }
     await saveRecord(config.dataRoot, record);
+    await applyEnrichToCatalog(config, entry, record);
+    await noteSourceHealth(config, entry, record);
     return record;
   }
 
@@ -192,18 +213,23 @@ export async function enrichOne(
       source: entry.source,
       status: "skipped",
       kind: "none",
+      discoveryUrl: entry.discovery_url || entry.url,
+      canonicalUrl: entry.canonical_url || entry.url,
+      canonicalDomain: hostnameOf(entry.canonical_url || entry.url),
       title: entry.title_ja || entry.title,
       text: "",
       chars: 0,
       error: "source_skipped",
+      strategy: "feed-only",
       aliasIds: opts?.aliasIds,
       enrichedAt: nowIso(),
     };
     await saveRecord(config.dataRoot, record);
+    await applyEnrichToCatalog(config, entry, record);
     return record;
   }
 
-  let fetchUrl = opts?.fetchUrl || entry.url;
+  let fetchUrl = opts?.fetchUrl || entry.canonical_url || entry.url;
   if (isGoogleNewsUrl(fetchUrl)) {
     const canon = await canonicalizeUrl(fetchUrl, config.userAgent);
     if (canon.via === "google-news") {
@@ -226,7 +252,12 @@ export async function enrichOne(
     source: entry.source,
     status,
     kind: "article",
+    discoveryUrl: web.discoveryUrl || entry.discovery_url || entry.url,
     finalUrl: web.finalUrl,
+    canonicalUrl: web.canonicalUrl || web.finalUrl,
+    canonicalDomain: web.canonicalDomain || hostnameOf(web.canonicalUrl || web.finalUrl),
+    contentHash: web.contentHash,
+    httpStatus: web.httpStatus,
     title: web.title || entry.title_ja || entry.title,
     text: web.text,
     chars: web.chars,
@@ -236,7 +267,71 @@ export async function enrichOne(
     enrichedAt: nowIso(),
   };
   await saveRecord(config.dataRoot, record);
+  await applyEnrichToCatalog(config, entry, record);
+  await noteSourceHealth(config, entry, record);
   return record;
+}
+
+async function applyEnrichToCatalog(
+  config: AppConfig,
+  entry: CatalogEntry,
+  record: EnrichRecord,
+): Promise<void> {
+  const fetch_status: FetchStatus = mapFetchStatusFromEnrich({
+    ok: record.status === "ok",
+    chars: record.chars,
+    error: record.error,
+    unresolved:
+      record.error === "unresolved_news_url" || record.error === "dead_host",
+    httpStatus: record.httpStatus,
+  });
+  const canonical =
+    record.canonicalUrl && !isGoogleNewsUrl(record.canonicalUrl)
+      ? normalizeUrl(record.canonicalUrl)
+      : entry.canonical_url && !isGoogleNewsUrl(entry.canonical_url)
+        ? entry.canonical_url
+        : undefined;
+  const ids = [entry.id, ...(record.aliasIds ?? [])];
+  await patchCatalogEntries(
+    config.dataRoot,
+    ids.map((id) => ({
+      id,
+      discovery_url: record.discoveryUrl || entry.discovery_url || entry.url,
+      canonical_url: canonical,
+      canonical_domain: canonical
+        ? hostnameOf(canonical)
+        : record.canonicalDomain,
+      content_hash: record.contentHash,
+      fetch_status,
+      http_status: record.httpStatus,
+      resolved_at:
+        canonical || record.finalUrl ? record.enrichedAt : entry.resolved_at,
+      fetch_strategy: record.strategy,
+      fetch_error: record.error,
+    })),
+  );
+}
+
+async function noteSourceHealth(
+  config: AppConfig,
+  entry: CatalogEntry,
+  record: EnrichRecord,
+): Promise<void> {
+  const host =
+    record.canonicalDomain ||
+    hostnameOf(record.canonicalUrl || entry.canonical_url || entry.url) ||
+    entry.source;
+  const sourceId = `${entry.source}:${host}`;
+  await recordSourceAttempt(config.dataRoot, {
+    at: record.enrichedAt,
+    sourceId,
+    sourceKind: entry.source,
+    ok: record.status === "ok",
+    partial: record.status === "partial",
+    httpStatus: record.httpStatus,
+    error: record.error,
+    itemId: entry.id,
+  });
 }
 
 export async function enrichEntries(

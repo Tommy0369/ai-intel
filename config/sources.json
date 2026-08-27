@@ -80,6 +80,30 @@
         "categoryHint": "industry"
       },
       {
+        "id": "github-anthropic-sdk-releases",
+        "name": "Anthropic SDK releases",
+        "url": "https://github.com/anthropics/anthropic-sdk-python/releases.atom",
+        "categoryHint": "agents"
+      },
+      {
+        "id": "github-openai-python-releases",
+        "name": "OpenAI Python releases",
+        "url": "https://github.com/openai/openai-python/releases.atom",
+        "categoryHint": "llms"
+      },
+      {
+        "id": "github-vercel-ai-releases",
+        "name": "Vercel AI SDK releases",
+        "url": "https://github.com/vercel/ai/releases.atom",
+        "categoryHint": "tools"
+      },
+      {
+        "id": "github-langchainjs-releases",
+        "name": "LangChain JS releases",
+        "url": "https://github.com/langchain-ai/langchainjs/releases.atom",
+        "categoryHint": "agents"
+      },
+      {
         "id": "google-ai-blog",
         "name": "Google AI Blog",
         "url": "https://blog.google/technology/ai/rss/",

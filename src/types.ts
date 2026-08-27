@@ -59,11 +59,39 @@ export interface IntelItem {
   relativePath: string;
 }
 
+export type FetchStatus =
+  | "not_attempted"
+  | "success"
+  | "partial"
+  | "failed"
+  | "paywall"
+  | "js_shell"
+  | "unresolved"
+  | "dead_source";
+
+export type FetchErrorCode =
+  | "http_error"
+  | "empty"
+  | "js_shell"
+  | "paywall"
+  | "parse_error"
+  | "redirect_loop"
+  | "unresolved_news_url"
+  | "feed_noise"
+  | "timeout"
+  | "dns_error"
+  | "blocked"
+  | "rate_limited"
+  | "upstream_error"
+  | "source_skipped"
+  | "dead_host";
+
 export interface CatalogEntry {
   id: string;
   title: string;
   /** 一眼でわかる日本語タイトル（表示用） */
   title_ja?: string;
+  /** 既存互換フィールド（置換しない） */
   url: string;
   source: SourceKind;
   category: Category;
@@ -72,6 +100,19 @@ export interface CatalogEntry {
   tags: string[];
   lang: string;
   path: string;
+  /** 最初に発見したURL（例: Google News） */
+  discovery_url?: string;
+  /** 本文取得・Notebookに使う最終URL */
+  canonical_url?: string;
+  canonical_domain?: string;
+  /** 本文正規化後の SHA-256（本文取得成功時） */
+  content_hash?: string;
+  fetch_status?: FetchStatus;
+  http_status?: number;
+  resolved_at?: string;
+  fetch_strategy?: string;
+  fetch_error?: string;
+  event_id?: string;
 }
 
 export interface AppConfig {
@@ -104,6 +145,20 @@ export interface AppConfig {
   clusterMaxGroups?: number;
   /** notebook: 1クラスタの上限件数。超えたら再分割（既定10） */
   clusterMaxSize?: number;
+  /** intelligence priorityScore の重み（未指定なら既定） */
+  scoringWeights?: Partial<ScoringWeights>;
+}
+
+export interface ScoringWeights {
+  authority: number;
+  evidence: number;
+  freshness: number;
+  novelty: number;
+  velocity: number;
+  diversity: number;
+  relevance: number;
+  actionability: number;
+  opportunity: number;
 }
 
 export interface SourcesConfig {

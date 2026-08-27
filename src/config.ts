@@ -16,6 +16,7 @@ export async function loadConfig(): Promise<AppConfig> {
     throw new Error("config.dataRoot is required");
   }
   return {
+    ...parsed,
     dataRoot: parsed.dataRoot,
     intervalMinutes: parsed.intervalMinutes ?? 30,
     vetReviewHours: parsed.vetReviewHours ?? 24,

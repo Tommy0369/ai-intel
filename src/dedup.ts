@@ -6,13 +6,21 @@ export function normalizeUrl(url: string): string {
   try {
     const u = new URL(url.trim());
     u.hash = "";
-    // strip common tracking params
+    const dropExact = new Set([
+      "fbclid",
+      "gclid",
+      "mc_cid",
+      "mc_eid",
+      "ref",
+      "ref_src",
+      "si",
+      "feature",
+    ]);
     for (const key of [...u.searchParams.keys()]) {
+      const lower = key.toLowerCase();
       if (
-        key.startsWith("utm_") ||
-        key === "ref" ||
-        key === "si" ||
-        key === "feature"
+        lower.startsWith("utm_") ||
+        dropExact.has(lower)
       ) {
         u.searchParams.delete(key);
       }

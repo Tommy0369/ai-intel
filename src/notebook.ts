@@ -302,8 +302,9 @@ function renderEnrichBlock(
   if (r?.text) {
     const label = r.kind === "transcript" ? "字幕（抽出）" : "本文（抽出）";
     lines.push(`#### ${label}`, "");
-    if (r.finalUrl && r.finalUrl !== r.url) {
-      lines.push(`- 取得URL: ${r.finalUrl}`);
+    const got = r.canonicalUrl || r.finalUrl;
+    if (got && got !== r.url) {
+      lines.push(`- 取得URL: ${got}`);
     }
     if (r.lang) lines.push(`- 言語: ${r.lang}`);
     lines.push(`- 文字数: ${r.chars}`, "");
@@ -324,6 +325,16 @@ function renderEnrichBlock(
     );
   }
   return lines;
+}
+
+function memberBestUrl(
+  m: { id: string; url: string },
+  enrich?: Map<string, EnrichRecord>,
+): string {
+  const r = enrich?.get(m.id);
+  const cand = r?.canonicalUrl || r?.finalUrl || m.url;
+  if (cand && !/news\.google\.com/i.test(cand)) return cand;
+  return m.url;
 }
 
 function buildContextMarkdown(
@@ -399,7 +410,9 @@ function buildContextMarkdown(
     for (const d of dups) {
       lines.push(`- **${clip(d.title, 70)}** × ${d.members.length}`);
       for (const m of d.members) {
-        lines.push(`  - ${m.source}${m.url ? ` — ${m.url}` : ""}`);
+        lines.push(
+          `  - ${m.source}${memberBestUrl(m, enrich) ? ` — ${memberBestUrl(m, enrich)}` : ""}`,
+        );
       }
     }
   } else {
@@ -472,7 +485,7 @@ function buildContextMarkdown(
     lines.push(`- 出典: ${m.source} / ${m.category}`);
     lines.push(`- 日付: ${dateOnly(m.date) || "—"}`);
     lines.push(`- タグ: ${m.tags.length ? m.tags.join(", ") : "—"}`);
-    if (m.url) lines.push(`- URL: ${m.url}`);
+    if (m.url) lines.push(`- URL: ${memberBestUrl(m, enrich)}`);
     lines.push("");
     lines.push("#### フィード要約", "");
     lines.push(cleanText(m.summary) || "（要約なし。タイトルのみ）");
@@ -483,7 +496,8 @@ function buildContextMarkdown(
   lines.push(`## 9. 出典一覧`, "");
   cluster.members.forEach((m, i) => {
     const idx = String(i + 1).padStart(2, "0");
-    const url = m.url ? ` — ${m.url}` : "";
+    const best = memberBestUrl(m, enrich);
+    const url = best ? ` — ${best}` : "";
     lines.push(`- ${idx}: \`${m.id}\`${url}`);
   });
   lines.push("");
@@ -635,7 +649,7 @@ function renderSourcesMd(
     if (m.titleJa && m.titleJa !== m.title) {
       lines.push(`- 原題: ${m.title}`);
     }
-    lines.push(`- URL: ${m.url}`);
+    lines.push(`- URL: ${memberBestUrl(m, enrich)}`);
     lines.push(`- 出典: ${m.source} / ${m.category}`);
     lines.push(`- id: \`${m.id}\``);
     lines.push("");
@@ -814,7 +828,7 @@ async function writeClusterFolder(
   );
   await writeBoth(
     path.join(dir, "sources.txt"),
-    cluster.members.map((m) => m.url).join("\n") + "\n",
+    cluster.members.map((m) => memberBestUrl(m, enrich)).join("\n") + "\n",
   );
   await writeBoth(path.join(dir, "PROMPT.md"), renderClusterPrompt(cluster));
   await writeBoth(

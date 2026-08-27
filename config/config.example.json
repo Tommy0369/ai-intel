@@ -7,5 +7,16 @@
   "dupWatchHours": 24,
   "icloudBridgeRoot": "/path/to/intel-bridge",
   "userAgent": "ai-intel/1.0 (+local collector; personal use)",
-  "googleDriveNotebookRoot": "/path/to/GoogleDrive/NotebookLM"
+  "googleDriveNotebookRoot": "/path/to/GoogleDrive/NotebookLM",
+  "scoringWeights": {
+    "authority": 0.15,
+    "evidence": 0.1,
+    "freshness": 0.1,
+    "novelty": 0.15,
+    "velocity": 0.1,
+    "diversity": 0.1,
+    "relevance": 0.15,
+    "actionability": 0.1,
+    "opportunity": 0.05
+  }
 }

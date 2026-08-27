@@ -447,12 +447,13 @@ export function buildClusterTitleJa(
 function toMember(
   d: ReadItem,
   titleJaById: Map<string, string | undefined>,
+  urlById?: Map<string, string>,
 ): ClusterMember {
   return {
     id: d.id,
     title: d.title,
     titleJa: titleJaById.get(d.id),
-    url: d.url,
+    url: urlById?.get(d.id) || d.url,
     source: d.source,
     category: d.category,
     summary: d.summary,
@@ -516,6 +517,7 @@ function keywordsFor(members: ClusterMember[]): string[] {
 function clusterCategoryDocs(
   docs: ReadItem[],
   titleJaById: Map<string, string | undefined>,
+  urlById: Map<string, string>,
   options: Required<ClusterOptions>,
 ): Array<Omit<TopicCluster, "index">> {
   const n = docs.length;
@@ -543,7 +545,9 @@ function clusterCategoryDocs(
   );
 
   return refined.map((memberIdx) => {
-    const members = memberIdx.map((i) => toMember(docs[i], titleJaById));
+    const members = memberIdx.map((i) =>
+      toMember(docs[i], titleJaById, urlById),
+    );
     const keywords = keywordsFor(members);
     const category = dominantCategory(members);
     const titleJa = buildClusterTitleJa(members, keywords);
@@ -590,6 +594,14 @@ export async function clusterCorpus(
   const titleJaById = new Map(
     catalog.map((e) => [e.id, e.title_ja] as const),
   );
+  const urlById = new Map(
+    catalog.map((e) => [
+      e.id,
+      e.canonical_url && !/news\.google\.com/i.test(e.canonical_url)
+        ? e.canonical_url
+        : e.url,
+    ]),
+  );
 
   const docs = items.filter((i) => i.readOk);
   const byCat = new Map<Category, ReadItem[]>();
@@ -601,7 +613,7 @@ export async function clusterCorpus(
 
   const pooled: Array<Omit<TopicCluster, "index">> = [];
   for (const catDocs of byCat.values()) {
-    pooled.push(...clusterCategoryDocs(catDocs, titleJaById, options));
+    pooled.push(...clusterCategoryDocs(catDocs, titleJaById, urlById, options));
   }
 
   pooled.sort((a, b) => b.size - a.size);

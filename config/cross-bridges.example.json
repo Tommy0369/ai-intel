@@ -1,0 +1,13 @@
+{
+  "schema": "ai-intel.cross-bridges.v1",
+  "bridges": [
+    { "left": ["llms", "agents", "tools"], "right": ["biz"], "relationship": "application", "label": "AI × Business" },
+    { "left": ["llms", "agents"], "right": ["dining"], "relationship": "application", "label": "AI × Dining" },
+    { "left": ["mind"], "right": ["biz"], "relationship": "analogy", "label": "Psychology × Marketing" },
+    { "left": ["mind"], "right": ["dining"], "relationship": "application", "label": "Behavioral Economics × Dining" },
+    { "left": ["trends"], "right": ["biz", "dining"], "relationship": "trend", "label": "Trend × Business/Dining" },
+    { "left": ["body"], "right": ["dining"], "relationship": "combination", "label": "Health × Dining" },
+    { "left": ["agents", "tools"], "right": ["dining"], "relationship": "opportunity", "label": "Automation × Dining" },
+    { "left": ["llms", "agents"], "right": ["mind"], "relationship": "analogy", "label": "AI × NLP/Psychology" }
+  ]
+}

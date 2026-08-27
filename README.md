@@ -39,10 +39,39 @@
 
 ```bash
 cd ai-intel
+npm run collect
+npm run intelligence   # Event→Trend→Knowledge→Cross→Ideas→Content
+npm run events / events:status
+npm run trends -- --hot
+npm run knowledge
+npm run cross -- --type=opportunity
+npm run ideas / content:today
+npm run ingest -- --file="./notes/memo.md"
+npm run source:health
+npm run feedback -- --id=evt_xxx --label=important
+npm run feedback:status / preferences
+npm run status
+npm run ship           # iCloud へ渡す
+npm run notebook       # NotebookLM 用まとめ
+npm run tommy
+```
+
+### Intelligence パイプライン（Step 01–11）
+
+```text
+Collect → Canonical → Event → Scoring → Trend
+  → Knowledge Core → Cross → Ideas → Content Cards
+  → Feedback / Preferences
+```
+
+正本は JSON/JSONL（`dataRoot/`）。Markdown/HTML は成果物。
+
+## 旧コマンド
+
+```bash
 npm run ship     # いまの分析を iCloud へ渡す
 npm run notebook # 似た話題を束ねて NotebookLM 用まとめフォルダを生成
 npm run collect -- --keyword="AI agent" --from=2026-07-01 --to=2026-07-31
-                 # キーワード＋期間で狙い撃ち収集
 npm run auto     # daily→…→ship まで全部
 npm run tommy
 npm run desktop

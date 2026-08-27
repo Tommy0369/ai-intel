@@ -38,6 +38,9 @@ MODE="${1:-full}" # full | resume（dailyスキップして finish+go のみ）
   echo "▶ npm run tommy"
   /usr/bin/env npm run tommy
 
+  echo "▶ npm run intelligence"
+  /usr/bin/env npm run intelligence
+
   echo "▶ npm run ship"
   /usr/bin/env npm run ship
 

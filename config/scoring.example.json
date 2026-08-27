@@ -1,0 +1,38 @@
+{
+  "schema": "ai-intel.scoring.v1",
+  "authority": {
+    "official": 95,
+    "docs": 92,
+    "company-blog": 88,
+    "primary-source": 85,
+    "major-press": 80,
+    "specialty": 72,
+    "general-news": 65,
+    "community": 40,
+    "sns": 28
+  },
+  "evidence": {
+    "meta-analysis": 95,
+    "systematic-review": 93,
+    "rct": 90,
+    "peer-reviewed": 85,
+    "preprint": 62,
+    "official-announcement": 88,
+    "news": 55,
+    "expert-opinion": 45,
+    "sns-opinion": 25
+  },
+  "weights": {
+    "authority": 0.1,
+    "evidence": 0.08,
+    "freshness": 0.1,
+    "novelty": 0.12,
+    "diversity": 0.08,
+    "impact": 0.1,
+    "actionability": 0.1,
+    "relevance": 0.14,
+    "business": 0.08,
+    "content": 0.06,
+    "learning": 0.04
+  }
+}

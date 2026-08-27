@@ -4,6 +4,8 @@ import { assertDataRootReady, ensureLayout } from "./disk.js";
 import { nowIso } from "./http.js";
 import { countByCategory, loadCatalog, sortByRecency } from "./corpus.js";
 import { loadVetLedger, type VetRecord } from "./vet.js";
+import { readJson } from "./store-jsonl.js";
+import type { TodayBrief } from "./v2-types.js";
 import {
   CATEGORIES,
   type AppConfig,
@@ -324,6 +326,42 @@ export async function runDashboard(
   const topBizJa = topBiz ? glanceOf(topBiz, titles) : "";
   const topDiningJa = topDining ? glanceOf(topDining, titles) : "";
   const topRecentJa = recent[0] ? glanceOf(recent[0], titles) : "";
+  const today = await readJson<TodayBrief | null>(
+    path.join(config.dataRoot, "ready", "intelligence", "today.json"),
+    null,
+  );
+  const healthLatest = await readJson<{
+    rows?: Array<{ status: string; sourceId: string }>;
+  } | null>(path.join(config.dataRoot, "source-health", "latest.json"), null);
+  const healthRows = healthLatest?.rows ?? [];
+  const hOk = healthRows.filter((r) => r.status === "healthy").length;
+  const hWarn = healthRows.filter((r) => r.status === "warning").length;
+  const hDead = healthRows.filter((r) => r.status === "dead").length;
+  const healthBlock =
+    healthRows.length > 0
+      ? `<section id="source-health"><h2>Source Health</h2>
+        <p class="sub">healthy ${hOk} / warning ${hWarn} / dead ${hDead}</p>
+        <ul class="list">${healthRows
+          .filter((r) => r.status !== "healthy")
+          .slice(0, 12)
+          .map(
+            (r) =>
+              `<li><strong>${esc(r.status)}</strong> ${esc(r.sourceId)}</li>`,
+          )
+          .join("") || "<li>問題ソースなし</li>"}</ul></section>`
+      : "";
+  const intelBlock = today
+    ? `<section id="intel-today">
+        <h2>今日の知能</h2>
+        <p class="sub">Event化・急上昇・とみー向け・SNSネタ（${esc(today.generatedAt.slice(0, 16))}）</p>
+        <div class="missions">
+          <article class="mission"><h3>重要Event</h3><ol>${today.important.slice(0, 8).map((e) => `<li>${esc(e.titleJa || e.title)} <small>${e.priorityScore}</small></li>`).join("")}</ol></article>
+          <article class="mission"><h3>急上昇</h3><ol>${today.rising.slice(0, 8).map((e) => `<li>${esc(e.titleJa || e.title)} <small>${e.trendStatus ?? ""}</small></li>`).join("")}</ol></article>
+          <article class="mission"><h3>とみー向け</h3><ol>${today.tommy.slice(0, 8).map((e) => `<li>${esc(e.titleJa || e.title)} <small>${e.tommyRelevanceScore}</small></li>`).join("")}</ol></article>
+          <article class="mission"><h3>SNSネタ</h3><ol>${today.snsIdeas.slice(0, 8).map((i) => `<li>${esc(i.title)} <small>${i.contentPriorityScore}</small></li>`).join("")}</ol></article>
+        </div>
+      </section>${healthBlock}`
+    : `<section id="intel-today"><h2>今日の知能</h2><p class="sub">まだです。ターミナルで <code>npm run intelligence</code> を実行すると Event / ネタがここに出ます。</p></section>${healthBlock}`;
 
   const html = `<!DOCTYPE html>
 <html lang="ja">
@@ -615,6 +653,7 @@ body:has(.cat-panel:target) .home-view { display: none; }
         <div class="cta">
           <a class="btn btn-main" href="#missions">今日の任務を見る</a>
           <a class="btn btn-ghost" href="#shelves">担当棚を開く</a>
+          <a class="btn btn-ghost" href="#intel-today">今日の知能</a>
           <a class="btn btn-ghost" href="LINKS.html">リンク一覧を開く</a>
           <a class="btn btn-ghost" href="NOTEBOOK.html">知識の書を開く</a>
         </div>
@@ -631,6 +670,8 @@ body:has(.cat-panel:target) .home-view { display: none; }
         <div class="card"><b>${pass}</b><span>精査OK</span></div>
         <div class="card"><b>${pending}</b><span>精査待ち</span></div>
       </div>
+
+      ${intelBlock}
 
       <section id="missions">
         <h2>今日の任務</h2>

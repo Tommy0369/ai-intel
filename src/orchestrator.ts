@@ -264,6 +264,7 @@ export async function runStatus(config: AppConfig): Promise<void> {
   const { getFreeBytes, volumePath } = await import("./disk.js");
   const { readFile } = await import("node:fs/promises");
   const path = await import("node:path");
+  const { readJson } = await import("./store-jsonl.js");
 
   await assertDataRootReady(config);
   const volume = volumePath(config.dataRoot);
@@ -279,10 +280,47 @@ export async function runStatus(config: AppConfig): Promise<void> {
     lastRun = null;
   }
 
+  const eventState = await readJson<{ eventCount?: number; articleCount?: number } | null>(
+    path.join(config.dataRoot, "events", "state.json"),
+    null,
+  );
+  const knowledgeIndex = await readJson<{
+    entities?: number;
+    claims?: number;
+    concepts?: number;
+  } | null>(path.join(config.dataRoot, "knowledge", "index.json"), null);
+  const ideas = await readJson<{ count?: number } | null>(
+    path.join(config.dataRoot, "ideas", "latest.json"),
+    null,
+  );
+  const health = await readJson<{ rows?: Array<{ status: string }> } | null>(
+    path.join(config.dataRoot, "source-health", "latest.json"),
+    null,
+  );
+  const personal = await readJson<{ documents?: unknown[] } | null>(
+    path.join(config.dataRoot, "personal", "index.json"),
+    null,
+  );
+
+  const healthRows = health?.rows ?? [];
+  const dead = healthRows.filter((r) => r.status === "dead").length;
+  const warning = healthRows.filter((r) => r.status === "warning").length;
+
   console.log(`dataRoot : ${config.dataRoot}`);
   console.log(`volume   : ${volume}`);
   console.log(`free     : ${freeGb.toFixed(2)} GB`);
   console.log(`catalog  : ${total} entries`);
+  console.log(
+    `events   : ${eventState?.eventCount ?? "—"} (articles ${eventState?.articleCount ?? "—"})`,
+  );
+  console.log(
+    `knowledge: entities ${knowledgeIndex?.entities ?? "—"} / claims ${knowledgeIndex?.claims ?? "—"}`,
+  );
+  console.log(`ideas    : ${ideas?.count ?? "—"}`);
+  console.log(
+    `sources  : ${healthRows.length || "—"} (warning ${warning} / dead ${dead})`,
+  );
+  console.log(`personal : ${personal?.documents?.length ?? 0} documents`);
   if (lastRun) {
     console.log(`lastRun  : ${lastRun.finishedAt ?? "(unknown)"}`);
     console.log(`  written: ${lastRun.written ?? "?"}`);

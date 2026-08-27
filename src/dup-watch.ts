@@ -33,7 +33,9 @@ export type DupKind =
   | "near-url"
   | "youtube-id"
   | "same-title"
-  | "similar-title";
+  | "similar-title"
+  | "same-canonical-url"
+  | "same-content-hash";
 
 export type DupGroupStatus = "holding" | "applied" | "skipped";
 
@@ -232,6 +234,12 @@ function buildGroups(
     if (!e.url) continue;
     add("same-url", normalizeUrl(e.url), e.id);
     add("near-url", fingerprintUrl(e.url), e.id);
+    if (e.canonical_url && !/news\.google\.com/i.test(e.canonical_url)) {
+      add("same-canonical-url", normalizeUrl(e.canonical_url), e.id);
+    }
+    if (e.content_hash && e.content_hash.length >= 16) {
+      add("same-content-hash", e.content_hash, e.id);
+    }
     const yid = youtubeVideoId(e.url);
     if (yid) add("youtube-id", yid, e.id);
     const tk = normalizeTitleKey(e.title_ja || e.title);
@@ -312,6 +320,8 @@ function buildGroups(
 
   const order: DupKind[] = [
     "same-url",
+    "same-canonical-url",
+    "same-content-hash",
     "youtube-id",
     "near-url",
     "same-title",
@@ -346,13 +356,17 @@ function buildGroups(
     const reason =
       b.kind === "same-url"
         ? "正規化URLが同一"
-        : b.kind === "near-url"
-          ? "ホスト+パスが実質同一（www/追跡パラメータ差）"
-          : b.kind === "youtube-id"
-            ? "同一 YouTube 動画ID"
-            : b.kind === "same-title"
-              ? "正規化タイトルが同一"
-              : "タイトル類似度が高い（同一記事の転載の可能性）";
+        : b.kind === "same-canonical-url"
+          ? "canonical_url が同一"
+          : b.kind === "same-content-hash"
+            ? "content_hash（本文）が同一"
+            : b.kind === "near-url"
+              ? "ホスト+パスが実質同一（www/追跡パラメータ差）"
+              : b.kind === "youtube-id"
+                ? "同一 YouTube 動画ID"
+                : b.kind === "same-title"
+                  ? "正規化タイトルが同一"
+                  : "タイトル類似度が高い（同一記事の転載の可能性）";
 
     groups.push({
       id: groupId(b.kind, b.key),
@@ -563,6 +577,8 @@ export async function runDupWatch(
     "youtube-id": 0,
     "same-title": 0,
     "similar-title": 0,
+    "same-canonical-url": 0,
+    "same-content-hash": 0,
   } as Record<DupKind, number>;
   let dropCandidates = 0;
   for (const g of groups) {

@@ -1,6 +1,6 @@
 {
   "name": "ai-intel",
-  "version": "1.6.0",
+  "version": "2.0.0",
   "private": true,
   "description": "AI情報収集→アナロジー→評価→改造完走までのCLI",
   "type": "module",
@@ -46,7 +46,24 @@
     "search": "tsx src/cli.ts search",
     "cycle": "tsx src/cli.ts cycle",
     "status": "tsx src/cli.ts status",
-    "rebuild-index": "tsx src/cli.ts rebuild-index"
+    "rebuild-index": "tsx src/cli.ts rebuild-index",
+    "intelligence": "tsx src/cli.ts intelligence",
+    "events": "tsx src/cli.ts events",
+    "events:status": "tsx src/cli.ts events:status",
+    "trends": "tsx src/cli.ts trends",
+    "cross": "tsx src/cli.ts cross",
+    "ideas": "tsx src/cli.ts ideas",
+    "content": "tsx src/cli.ts content",
+    "content:today": "tsx src/cli.ts content:today",
+    "knowledge": "tsx src/cli.ts knowledge",
+    "ingest": "tsx src/cli.ts ingest",
+    "ingest:status": "tsx src/cli.ts ingest:status",
+    "feedback:status": "tsx src/cli.ts feedback:status",
+    "preferences": "tsx src/cli.ts preferences",
+    "source:health": "tsx src/cli.ts source:health",
+    "notebook:persistent": "tsx src/cli.ts notebook:persistent",
+    "test": "tsx --test src/events/url.test.ts src/events/event-similarity.test.ts src/intelligence/scoring.test.ts src/content/idea-engine.test.ts src/canonical/input-hardening.test.ts src/knowledge/extract.test.ts src/cross/cross-intelligence.test.ts src/personal/ingest.test.ts src/trends/velocity.test.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",

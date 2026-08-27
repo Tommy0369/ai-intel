@@ -3,6 +3,7 @@ import path from "node:path";
 import type { CatalogEntry, IntelItem } from "./types.js";
 import { CATEGORIES } from "./types.js";
 import { toGlanceTitle } from "./title-ja.js";
+import { initialCatalogFetchFields } from "./canonical/catalog-fields.js";
 
 function yamlEscape(value: string): string {
   if (/[:#\[\]{}",'\n]/.test(value) || value.trim() !== value) {
@@ -69,6 +70,7 @@ export function toCatalogEntry(item: IntelItem): CatalogEntry {
     tags: item.tags,
     lang: item.lang,
     path: item.relativePath,
+    ...initialCatalogFetchFields(item.url),
   };
 }
 

@@ -34,6 +34,25 @@ import { runLinksHtml } from "./links-html.js";
 import { runNotebookHtml } from "./notebook-html.js";
 import { printFleetStatus } from "./fleet/index.js";
 import { runTommy, runTommyBrief } from "./tommy.js";
+import { runIntelligence } from "./pipeline.js";
+import { runEventEngine } from "./events/event-engine.js";
+import { runTrendEngine } from "./trends/trend-engine.js";
+import {
+  formatEventStatus,
+  loadEventState,
+  loadEvents,
+  summarizeEvents,
+} from "./events/event-store.js";
+import { runCrossIntelligence } from "./cross/cross-intelligence.js";
+import { runIdeaEngine } from "./content/idea-engine.js";
+import { runSourceHealth } from "./source-health/source-health.js";
+import {
+  learnPreferences,
+  loadFeedback,
+  normalizeFeedbackAction,
+  recordFeedback,
+} from "./feedback/feedback-store.js";
+import { runPersistentNotebook } from "./notebook-persistent.js";
 import {
   runDupApply,
   runDupStatus,
@@ -183,7 +202,11 @@ function printHelp(): void {
   console.log(`
 AI Intel — 収集 → アナロジー → 最強エージェント（外付けHDD）
 
-  npm run auto                 【自動】daily → finish → go → tommy → ship
+  npm run intelligence         【知能】Event化→急上昇→クロス→ネタ→カード
+  npm run events / trends / ideas / content / source:health
+  npm run content:today        【今日】SNSネタ ready/content/TODAY.md
+  npm run notebook:persistent  【NotebookLM】永続ソース更新
+  npm run auto                 【自動】daily → finish → go → tommy → intelligence → ship
   npm run ship                 【iCloud】因数分解パックを別Mac AIへ渡す
   npm run ship:categories      【テスト】各カテゴリ3件を by-category/ へ渡す
   npm run notebook             【まとめ】全話題 enrich→bodies/ 付き NotebookLM フォルダ一括生成
@@ -233,6 +256,241 @@ async function main(): Promise<void> {
   }
 
   const config = await loadConfig();
+
+  if (
+    cmd === "intelligence" ||
+    cmd === "events" ||
+    cmd === "events:status" ||
+    cmd === "trends" ||
+    cmd === "cross" ||
+    cmd === "ideas" ||
+    cmd === "content" ||
+    cmd === "content:today" ||
+    cmd === "source:health" ||
+    cmd === "source-health" ||
+    cmd === "notebook:persistent" ||
+    cmd === "knowledge"
+  ) {
+    if (cmd === "intelligence" || cmd === "content" || cmd === "content:today") {
+      const asJson = args.includes("--json");
+      const topArg = args.find((a) => a.startsWith("--top="));
+      const top = topArg ? parseInt(topArg.split("=")[1] ?? "10", 10) : 10;
+      const result = await runIntelligence(config);
+      if (asJson) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+      console.log("\n✓ intelligence");
+      console.log(`  events=${result.events} ideas=${result.ideas} cards=${result.cards}`);
+      console.log(`  top priority (showing up to ${top}) — run with --json for full`);
+      console.log(`  ${result.todayPath}`);
+      return;
+    }
+    if (cmd === "events") {
+      const rebuild = args.includes("--rebuild");
+      const asJson = args.includes("--json");
+      const catalog = await loadCatalog(config.dataRoot);
+      const events = await runEventEngine(config, catalog, {
+        rebuild,
+        linkCatalog: true,
+      });
+      const state = summarizeEvents(events, catalog.length);
+      if (asJson) {
+        console.log(JSON.stringify({ state, events: events.slice(0, 50) }, null, 2));
+        return;
+      }
+      console.log(formatEventStatus(state));
+      console.log(`\n✓ events ${events.length}`);
+      return;
+    }
+    if (cmd === "events:status") {
+      const asJson = args.includes("--json");
+      let state = await loadEventState(config.dataRoot);
+      if (!state) {
+        const events = await loadEvents(config.dataRoot);
+        state = summarizeEvents(events);
+      }
+      if (asJson) {
+        console.log(JSON.stringify(state, null, 2));
+        return;
+      }
+      console.log(formatEventStatus(state));
+      return;
+    }
+    if (cmd === "trends") {
+      const events = await loadEvents(config.dataRoot);
+      const next = await runTrendEngine(config.dataRoot, events);
+      const asJson = args.includes("--json");
+      const hotOnly = args.includes("--hot");
+      const risingOnly = args.includes("--rising");
+      let show = next;
+      if (hotOnly) show = next.filter((e) => e.trendStatus === "hot");
+      else if (risingOnly) {
+        show = next.filter((e) => e.trendStatus === "rising" || e.trendStatus === "emerging");
+      }
+      show = [...show].sort((a, b) => b.velocity - a.velocity).slice(0, 20);
+      if (asJson) {
+        console.log(JSON.stringify({ count: show.length, trends: show }, null, 2));
+        return;
+      }
+      for (const e of show) {
+        console.log(
+          `${(e.trendStatus ?? "stable").padEnd(10)} ${String(e.velocity).padStart(3)}  ${e.titleJa || e.title}`,
+        );
+      }
+      console.log(`\n✓ trends ${show.length}`);
+      return;
+    }
+    if (cmd === "cross") {
+      const events = await loadEvents(config.dataRoot);
+      const ins = await runCrossIntelligence(config.dataRoot, events);
+      const asJson = args.includes("--json");
+      const typeArg = args.find((a) => a.startsWith("--type="))?.slice(7);
+      const topArg = args.find((a) => a.startsWith("--top="));
+      const top = topArg ? parseInt(topArg.split("=")[1] ?? "30", 10) : 30;
+      let show = ins;
+      if (typeArg) {
+        show = ins.filter((x) => x.relationship === typeArg);
+      }
+      show = show.slice(0, top);
+      if (asJson) {
+        console.log(JSON.stringify({ count: show.length, insights: show }, null, 2));
+        return;
+      }
+      for (const x of show) {
+        console.log(
+          `${x.relationship.padEnd(14)} opp=${String(x.opportunityScore).padStart(3)}  ${x.title}`,
+        );
+      }
+      console.log(`\n✓ cross ${show.length}/${ins.length}`);
+      return;
+    }
+    if (cmd === "ideas") {
+      const events = await loadEvents(config.dataRoot);
+      const ideas = await runIdeaEngine(config.dataRoot, events);
+      console.log(`\n✓ ideas ${ideas.length}`);
+      return;
+    }
+    if (cmd === "source:health" || cmd === "source-health") {
+      const rows = await runSourceHealth(config);
+      const asJson = args.includes("--json");
+      if (asJson) {
+        console.log(JSON.stringify({ updatedAt: new Date().toISOString(), rows }, null, 2));
+        return;
+      }
+      const { formatSourceHealthTable } = await import(
+        "./source-health/source-health.js"
+      );
+      const healthy = rows.filter((r) => r.status === "healthy").length;
+      const warning = rows.filter((r) => r.status === "warning").length;
+      const dead = rows.filter((r) => r.status === "dead").length;
+      console.log(formatSourceHealthTable(rows));
+      console.log(
+        `\n✓ source-health ${rows.length}（healthy ${healthy} / warning ${warning} / dead ${dead}）`,
+      );
+      return;
+    }
+    if (cmd === "knowledge") {
+      const { runKnowledgeEngine } = await import("./knowledge/knowledge-engine.js");
+      const events = await loadEvents(config.dataRoot);
+      const asJson = args.includes("--json");
+      const r = await runKnowledgeEngine(config.dataRoot, events);
+      if (asJson) {
+        console.log(JSON.stringify(r, null, 2));
+        return;
+      }
+      console.log(
+        `\n✓ knowledge entities=${r.entities} concepts=${r.concepts} claims=${r.claims} relations=${r.relations}`,
+      );
+      console.log(`  ${r.path}`);
+      return;
+    }
+    if (cmd === "notebook:persistent") {
+      const r = await runPersistentNotebook(config);
+      console.log(`\n✓ persistent notebook ${r.dir} (${r.files.length} files)`);
+      return;
+    }
+  }
+
+  if (cmd === "feedback") {
+    const targetId = args.find((a) => a.startsWith("--id="))?.slice(5);
+    const label = args.find((a) => a.startsWith("--label="))?.slice(8);
+    if (!targetId || !label) {
+      console.error(
+        "usage: tsx src/cli.ts feedback --id=evt_xxx --label=important|business|sns|...",
+      );
+      process.exit(1);
+    }
+    const action = normalizeFeedbackAction(label) || label;
+    await recordFeedback(config.dataRoot, {
+      at: new Date().toISOString(),
+      targetType: "event",
+      targetId,
+      labels: [action],
+    });
+    console.log(`✓ feedback saved (${action})`);
+    return;
+  }
+
+  if (cmd === "feedback:status") {
+    const rows = await loadFeedback(config.dataRoot);
+    const asJson = args.includes("--json");
+    if (asJson) {
+      console.log(JSON.stringify({ count: rows.length, rows: rows.slice(-50) }, null, 2));
+      return;
+    }
+    console.log(`feedback records: ${rows.length}`);
+    for (const r of rows.slice(-20)) {
+      console.log(`  ${r.at.slice(0, 19)}  ${r.targetType}:${r.targetId}  ${r.labels.join(",")}`);
+    }
+    return;
+  }
+
+  if (cmd === "preferences" || cmd === "feedback:learn") {
+    const state = await learnPreferences(config.dataRoot);
+    if (args.includes("--json")) {
+      console.log(JSON.stringify(state, null, 2));
+      return;
+    }
+    console.log("recommended weight deltas (not auto-applied):");
+    for (const [k, v] of Object.entries(state.recommended_weight_deltas)) {
+      console.log(`  ${k}: ${v > 0 ? "+" : ""}${v}`);
+    }
+    for (const r of state.reasons) console.log(`  · ${r}`);
+    console.log(`\n✓ preferences ${state.updated_at}`);
+    return;
+  }
+
+  if (cmd === "ingest" || cmd === "ingest:status") {
+    const { ingestFile, ingestFolder, personalStatus } = await import(
+      "./personal/ingest.js"
+    );
+    if (cmd === "ingest:status") {
+      const st = await personalStatus(config.dataRoot);
+      if (args.includes("--json")) {
+        console.log(JSON.stringify(st, null, 2));
+        return;
+      }
+      console.log(`personal documents: ${st.documents}`);
+      for (const [k, v] of Object.entries(st.byType)) console.log(`  ${k}: ${v}`);
+      return;
+    }
+    const fileArg = args.find((a) => a.startsWith("--file="))?.slice(7);
+    const folderArg = args.find((a) => a.startsWith("--folder="))?.slice(9);
+    if (!fileArg && !folderArg) {
+      console.error('usage: npm run ingest -- --file="/path" | --folder="/path"');
+      process.exit(1);
+    }
+    const results = fileArg
+      ? [await ingestFile(config.dataRoot, fileArg)]
+      : await ingestFolder(config.dataRoot, folderArg!);
+    for (const r of results) {
+      console.log(`${r.status.padEnd(12)} ${r.path}${r.error ? `  (${r.error})` : ""}`);
+    }
+    const ok = results.filter((r) => r.status === "success").length;
+    console.log(`\n✓ ingest success ${ok}/${results.length}`);
+    return;
+  }
 
   if (cmd === "status") {
     await runStatus(config);
@@ -364,7 +622,7 @@ async function main(): Promise<void> {
   }
 
   if (cmd === "auto") {
-    console.log("自動フル儀式: daily → finish → go → tommy → ship");
+    console.log("自動フル儀式: daily → finish → go → tommy → intelligence → ship");
     const r = spawnSync(
       "bash",
       [path.join(rootDir, "scripts", "auto.sh"), "full"],
