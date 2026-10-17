@@ -62,8 +62,13 @@
     "preferences": "tsx src/cli.ts preferences",
     "source:health": "tsx src/cli.ts source:health",
     "notebook:persistent": "tsx src/cli.ts notebook:persistent",
-    "test": "tsx --test src/events/url.test.ts src/events/event-similarity.test.ts src/intelligence/scoring.test.ts src/content/idea-engine.test.ts src/canonical/input-hardening.test.ts src/knowledge/extract.test.ts src/cross/cross-intelligence.test.ts src/personal/ingest.test.ts src/trends/velocity.test.ts",
-    "typecheck": "tsc --noEmit"
+    "test": "tsx --test src/events/url.test.ts src/events/event-similarity.test.ts src/intelligence/scoring.test.ts src/content/idea-engine.test.ts src/canonical/input-hardening.test.ts src/knowledge/extract.test.ts src/cross/cross-intelligence.test.ts src/personal/ingest.test.ts src/trends/velocity.test.ts consulting/test/calc.test.mjs consulting/test/session.test.mjs consulting/test/content.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "consult:build": "node consulting/scripts/build.mjs",
+    "consult:serve": "node consulting/scripts/serve.mjs",
+    "consult:validate": "node consulting/scripts/validate.mjs",
+    "consult:sources": "node consulting/scripts/build-sources.mjs",
+    "consult:test": "node --test consulting/test/"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
