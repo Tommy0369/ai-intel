@@ -68,7 +68,7 @@
     "consult:serve": "node consulting/scripts/serve.mjs",
     "consult:validate": "node consulting/scripts/validate.mjs",
     "consult:sources": "node consulting/scripts/build-sources.mjs",
-    "consult:test": "node --test consulting/test/"
+    "consult:test": "node --test consulting/test/*.test.mjs"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
