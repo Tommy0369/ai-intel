@@ -31,6 +31,16 @@
 - iCloud `intel-bridge/mobile/DASHBOARD.html`（Filesアプリ）
 - 同じWi-Fi配信: `npm run phone`
 
+## RE:MAKE コンサル道場
+
+コンサル知識333（13章×4段階）・クイズ・相談整理（伴走）を1つにした学習／実務ツール。詳しくは [consulting/README.md](consulting/README.md)。
+
+```bash
+npm run consult:build   # consulting/dist/index.html を生成（そのまま開ける）
+npm run consult:serve   # 同じWi-Fiのスマホから開くURLを表示
+npm run consult:test
+```
+
 ## とみー
 
 デスクトップ **「とみーの今日」** → `TOMMY.md`
