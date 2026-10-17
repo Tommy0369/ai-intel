@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { loadChapter, validateChapter } from "../scripts/validate.mjs";
+import { LENGTH_BIAS_LIMIT, lengthBias, loadChapter, validateChapter } from "../scripts/validate.mjs";
 
 const outline = JSON.parse(readFileSync(new URL("../data/outline.json", import.meta.url), "utf8"));
 const drills = JSON.parse(readFileSync(new URL("../data/drills.json", import.meta.url), "utf8"));
@@ -31,6 +31,20 @@ test("知識カード: 全章が目次どおりで、検証エラーがない", 
 test("知識カード: クイズの問いが重複しない", () => {
   const qs = outline.chapters.flatMap((ch) => loadChapter(ch.id) || []).map((c) => c.quiz.q);
   assert.equal(new Set(qs).size, qs.length);
+});
+
+test("知識カード: 選択肢の長さで正解が分からない（正解だけが最長・最短の割合が上限以下）", () => {
+  for (const ch of outline.chapters) {
+    const b = lengthBias(loadChapter(ch.id));
+    assert.ok(b.longestRate <= LENGTH_BIAS_LIMIT, `${ch.id} 最長 ${b.longest.length}件`);
+    assert.ok(b.shortestRate <= LENGTH_BIAS_LIMIT, `${ch.id} 最短 ${b.shortest.length}件`);
+  }
+});
+
+test("知識カード: 正解の位置が偏らない", () => {
+  const pos = [0, 0, 0, 0];
+  for (const ch of outline.chapters) for (const c of loadChapter(ch.id)) pos[c.quiz.answer]++;
+  for (const n of pos) assert.ok(n >= 333 * 0.15, `正解位置の分布 ${pos.join("/")}`);
 });
 
 test("誤り探しドリル: 4択・正解位置が範囲内・選択肢の重複なし", () => {
